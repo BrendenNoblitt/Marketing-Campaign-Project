@@ -1,11 +1,15 @@
-/* LIBNAME STATEMENT*/
+/*** LIBNAME STATEMENT ***/
 /*libname sales XLSX "/home/u48754152/Marketing Campaign Data/salesdata.xlsx";
 run;*/
 
-/* MACRO VARIABLES */
-/*%let IncomeGroup = IG;*/
+/*** MACRO VARIABLES ***/
+/*%let IncomeGroup = IG;
+%let numdealpurchases = dealpurch;
+%let numwebpurchases = webpurch;
+%let numcatalogpurchases = catpurch;
+%let numstorepurchases=storepurch;*/
 
-/* INCOME EXPLORATORY DATA RESEARCH */
+/*** INCOME EXPLORATORY DATA RESEARCH ***/
 
 /*INCOME GROUPING PROGRAM*/
 /*data income_dis;
@@ -31,3 +35,28 @@ title;*/
 title 'Frequency of Income Groups';
 run;
 title;*/
+
+/*** LOGISTIC MODEL DEVELOPMENT ***/
+data purchase_train;
+	set sales.sheet1;
+	keep acceptedcmp1 numdealspurchases numwebpurchases numcatalogpurchases numstorepurchases IG income;
+	if income > . then IG = 1;
+	if income > 20000 then IG = 2;
+	if income > 40000 then IG = 3;
+	if income > 60000 then IG = 4;
+run;
+
+
+proc logistic data = sales.sheet1 desc; 
+class marital_status;
+model acceptedcmp1 =  numcatalogpurchases numdealspurchases numwebpurchases numstorepurchases;
+output out = purchases_output p = pred_purchases lower = low upper = upp;
+
+proc logistic data=sales.sheet1 desc;
+class marital_status;
+model acceptedcmp1 = numwebvisitsmonth / selection = forward;
+run;
+
+proc freq data=sales.sheet1;
+	tables acceptedcmp1;
+run;
