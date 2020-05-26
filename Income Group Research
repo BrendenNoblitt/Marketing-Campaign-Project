@@ -1,0 +1,24 @@
+/*INCOME GROUPING PROGRAM*/
+data income_dis;
+	set sales.sheet1;
+	keep ID income kidhome IG;
+	if income > . then IG = 1;
+	if income > 20000 then IG = 2;
+	if income > 40000 then IG = 3;
+	if income > 60000 then IG = 4;
+run;
+
+/*INCOME GROUP DISTRIBUTION HISTOGRAM*/
+proc univariate data=income_dis;
+	var IG;
+histogram IG / endpoints = 1 to 5 by 1;
+title 'Distribution of Income by Income Groups';
+run;
+title;
+
+/* INCOME GROUP FREQUENCY CHART*/
+proc gchart data=income_dis;
+	vbar IG / discrete;
+title 'Frequency of Income Groups';
+run;
+title;
