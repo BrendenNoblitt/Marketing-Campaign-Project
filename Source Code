@@ -37,26 +37,31 @@ run;
 title;*/
 
 /*** LOGISTIC MODEL DEVELOPMENT ***/
+
+
+/* LOGISTIC MODEL CREATION */
 data purchase_train;
 	set sales.sheet1;
-	keep acceptedcmp1 numdealspurchases numwebpurchases numcatalogpurchases numstorepurchases IG income;
-	if income > . then IG = 1;
-	if income > 20000 then IG = 2;
-	if income > 40000 then IG = 3;
-	if income > 60000 then IG = 4;
+	keep acceptedcmp1 marital_status numdealspurchases numwebpurchases numcatalogpurchases numstorepurchases;
 run;
 
-
-proc logistic data = sales.sheet1 desc; 
+proc logistic data = purchase_train desc; 
 class marital_status;
-model acceptedcmp1 =  numcatalogpurchases numdealspurchases numwebpurchases numstorepurchases;
+model acceptedcmp1 =  numcatalogpurchases numwebpurchases numstorepurchases;
 output out = purchases_output p = pred_purchases lower = low upper = upp;
 
 proc logistic data=sales.sheet1 desc;
 class marital_status;
-model acceptedcmp1 = numwebvisitsmonth / selection = forward;
+model acceptedcmp1 = numcatalogpurchases / selection = backward;
 run;
 
-proc freq data=sales.sheet1;
-	tables acceptedcmp1;
+/* LOGISTIC MODEL DATA CLEANING */
+data pred_group;
+	set purchases_output;
+	if pred_purchases = . then PG = 'NA';
+	if pred_purchases > 0.01 then PG = 1;
+	if pred_purchases > 0.05 then PG = 2;
+	if pred_purchases > 0.1 then PG = 3;
+	if pred_purchases > 0.15 then PG = 4;
+	if pred_purchases > 0.2 then PG = 5;
 run;
